@@ -1,4 +1,4 @@
 # Introduction_to_AI_Project1
 
-\n Repository dedicated to the first project of 'Introduction to AI.' Please refer to the following link for all the original files: https://github.com/nickplas/Introduction-to-AI-Project1.
-\n Every major update will be followed by a description of what has been modified.
+Repository dedicated to the first project of 'Introduction to AI.' Please refer to the following link for all the original files: https://github.com/nickplas/Introduction-to-AI-Project1<br /><br />
+Every major update will be followed by a description of what has been modified.<br />
