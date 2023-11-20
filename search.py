@@ -134,7 +134,7 @@ def depthFirstSearch(problem: SearchProblem):
                     # change any type of his component
         i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
                                         # path to each node from the start 
-        stack.push(tuple(i))    # Push every neighbors in to the stack, the last one will be the next one to be analyzed
+        stack.push(tuple(i))    # Push every neighbors in to the stack, the last will be the next one to be analyzed
     
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
@@ -204,7 +204,7 @@ def breadthFirstSearch(problem: SearchProblem):
                     # change any type of his component
         i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
                                         # path to each node from the start 
-        queue.push(tuple(i))    # Push every neighbors in to the queue, the last one will be the next one to be analyzed
+        queue.push(tuple(i))    # Push every neighbors in to the queue, the first will be the next one to be analyzed
     
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
@@ -251,20 +251,23 @@ def uniformCostSearch(problem: SearchProblem):
 
     # Let's review briefly how the  algorithm behaves:
     #       1) Take a certain starting node and expand all neighboring nodes;
-    #       2) Insert neighboring nodes into the queue, a Firs In First Out (FIFO) structure;
+    #       2) Insert neighboring nodes into the priority queue, particular type of structure that put the lowest path cost first;
     #       3) Mark the starting node as visited in the list of visited nodes;
-    #       4) Perform a pop operation from the queue, and that node becomes the 'current_node';
+    #       4) Perform a pop operation from the priority queue, and that node becomes the 'current_node';
     #       5) Repeat from step 1.
 
-    # With that we wrote the general outline of the BFS algorithm. Let's now focus on the details:
+    # With that we wrote the general outline of the UCS algorithm. Let's now focus on the details:
     #
     # 1) Nodes are tuples of the form ((x, y), "Direction", Weight), where the first element indicates 
     # the coordinates of the node, the second indicates the direction in which Pacman should move to reach it, 
     # and the third indicates the weight to reach that specific position;
-    # 2) BFS should return the path from the start node to the goal node. How do we follow 
+    # 2) UCS should return the path from the start node to the goal node. How do we follow 
     # the path without saving it in an additional structure? Every time we insert a new 
-    # discovered node into the queue, we update the second element of the tuple from a string 
+    # discovered node into the priority queue, we update the second element of the tuple from a string 
     # to a list containing all the movements necessary to reach that specific node.
+    # 3) We need to keep track of the cost for reach each node. So, like we did with the path, we update the cost
+    # before inserting them inside the priority queue. The priority queue will automatically rearange itself to put
+    # first the lowest cost path
 
     # And that is the summary of the algorithm we need to implement. Let's now analyze the code line by line.
 
@@ -274,13 +277,13 @@ def uniformCostSearch(problem: SearchProblem):
                     # change any type of his component
         i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
                                         # path to each node from the start 
-        priorityQueue.push(tuple(i),i[2])    # Push every neighbors in to the queue, the last one will be the next one to be analyzed
-    
+        priorityQueue.push(tuple(i),i[2])   # Push every neighbors in to the priority queue, the lowest cost one will be the next to be analyzed.
+                                        
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
 
-    while not priorityQueue.isEmpty():  # Unless the queue is empty, execute. Simple.
-        current_node = priorityQueue.pop() # Pop the nex node from the queue
+    while not priorityQueue.isEmpty():  # Unless the priority queue is empty, execute. Simple.
+        current_node = priorityQueue.pop() # Pop the nex node from the priority queue
         neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
 
         if problem.isGoalState(current_node[0]): # If that particular node is the goal state
@@ -296,9 +299,9 @@ def uniformCostSearch(problem: SearchProblem):
                 i[1] = current_node[1] + [direction] # If not, we set the path of the curren node + its direction.
                 #print(i)
                 visited.append(i[0]) # Insert the visited neighbour in the visited list
-                priorityQueue.push(tuple(i), current_node[2]+i[2]) #and than push out the tupla version
+                priorityQueue.push(tuple(i), current_node[2]+i[2]) # and than push out the tupla version with the updated cost path
 
-    # And that's all for the BFS. Let's move on to the next one
+    # And that's all for the UCS. Let's move on to the next one
 
 def nullHeuristic(state, problem=None):
     """
