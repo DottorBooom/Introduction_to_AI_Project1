@@ -113,7 +113,7 @@ def depthFirstSearch(problem: SearchProblem):
     #       1) Take a certain starting node and expand all neighboring nodes;
     #       2) Insert neighboring nodes into the stack, a Last In First Out (LIFO) structure;
     #       3) Mark the starting node as visited in the list of visited nodes;
-    #       4) Perform a pop operation from the stack, and the node becomes the 'current_node';
+    #       4) Perform a pop operation from the stack, and that node becomes the 'current_node';
     #       5) Repeat from step 1.
 
     # With that we wrote the general outline of the DFS algorithm. Let's now focus on the details:
@@ -126,7 +126,7 @@ def depthFirstSearch(problem: SearchProblem):
     # discovered node into the stack, we update the second element of the tuple from a string 
     # to a list containing all the movements necessary to reach that specific node.
 
-    # And that is the summary of the algorithm we need to structure. Let's now analyze the code line by line.
+    # And that is the summary of the algorithm we need to implement. Let's now analyze the code line by line.
 
     current_node = problem.getStartState() # Start with a given start node
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
@@ -164,7 +164,72 @@ def depthFirstSearch(problem: SearchProblem):
 def breadthFirstSearch(problem: SearchProblem):
     """Search the shallowest nodes in the search tree first."""
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    
+    ###### Data structure ###### 
+    
+    # This part of the code is dedicated to declaring the data structures that will be used for BFS.
+    # In particular: a list to contain all the nodes that have been visited and a queue to insert 
+    # the neighboring nodes that still need to be visited.
+    # Additionally, we will need some way to keep track of the path for the solution. 
+    # This will be explained in more detail later in the code. 
+    # For now, it's enough to know that these two structures will be the ones allowing us to navigate within the code.
+    
+    visited = []
+    queue = util.Queue()
+
+    ###### BFS ###### 
+
+    # Let's review briefly how the BFS algorithm behaves:
+    #       1) Take a certain starting node and expand all neighboring nodes;
+    #       2) Insert neighboring nodes into the queue, a Firs In First Out (FIFO) structure;
+    #       3) Mark the starting node as visited in the list of visited nodes;
+    #       4) Perform a pop operation from the queue, and that node becomes the 'current_node';
+    #       5) Repeat from step 1.
+
+    # With that we wrote the general outline of the BFS algorithm. Let's now focus on the details:
+    #
+    # 1) Nodes are tuples of the form ((x, y), "Direction", Weight), where the first element indicates 
+    # the coordinates of the node, the second indicates the direction in which Pacman should move to reach it, 
+    # and the third indicates the weight to reach that specific position;
+    # 2) BFS should return the path from the start node to the goal node. How do we follow 
+    # the path without saving it in an additional structure? Every time we insert a new 
+    # discovered node into the queue, we update the second element of the tuple from a string 
+    # to a list containing all the movements necessary to reach that specific node.
+
+    # And that is the summary of the algorithm we need to implement. Let's now analyze the code line by line.
+
+    current_node = problem.getStartState() # Start with a given start node
+    for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
+        i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
+                    # change any type of his component
+        i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
+                                        # path to each node from the start 
+        queue.push(tuple(i))    # Push every neighbors in to the queue, the last one will be the next one to be analyzed
+    
+    visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
+                                    # Why? Because we only need those for undertsand if a node is already be visited
+
+    while not queue.isEmpty():  # Unless the queue is empty, execute. Simple.
+        current_node = queue.pop() # Pop the nex node from the queue
+        neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
+
+        if problem.isGoalState(current_node[0]): # If that particular node is the goal state
+            #print(current_node[1])
+            return current_node[1] #Then, we can return the path that we save throw the execution of the code
+
+        # If the node is not a goal state we go throw every neighbors
+        for i in neighbors:
+            i = list(i) # As already explained before the while, we change the type
+            direction = i[1] # And save the current direction of that node
+
+            if i[0] not in visited: # we iterate inside the visited node and search for an already explored node
+                # The next one is foundamental
+                i[1] = current_node[1] + [direction] # If not, we set the path of the curren node + its direction.
+                #print(i)
+                visited.append(i[0]) # Insert the visited neighbour in the visited list
+                queue.push(tuple(i)) #and than push hout the tupla version
+
+    # And that's all for the BFS. Let's move on to the next one
 
 def uniformCostSearch(problem: SearchProblem):
     """Search the node of least total cost first."""
