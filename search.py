@@ -132,32 +132,29 @@ def depthFirstSearch(problem: SearchProblem):
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
-                                        # path to each node from the start 
-        stack.push(tuple(i))    # Push every neighbors in to the stack, the last will be the next one to be analyzed
+        i[1] = list([i[1]])     # Change the type of the direction from string to list, so we can insert the 
+                                # path to each node from the start 
+        stack.push(i)    # Push every neighbors in to the stack, the last will be the next one to be analyzed
     
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
 
     while not stack.isEmpty():  # Unless the stack is empty, execute. Simple.
         current_node = stack.pop() # Pop the nex node from the stack
-        neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
 
         if problem.isGoalState(current_node[0]): # If that particular node is the goal state
-            #print(current_node[1])
             return current_node[1] #Then, we can return the path that we save throw the execution of the code
 
-        # If the node is not a goal state we go throw every neighbors
-        for i in neighbors:
-            i = list(i) # As already explained before the while, we change the type
-            direction = i[1] # And save the current direction of that node
+        visited.append(current_node[0]) #If the current node is not a goal state, we insert it in the visisted list
+        neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
+        for i in neighbors: # We go throw every neighbors
+            i = list(i) # As already explained before in the first while, we change the type
 
             if i[0] not in visited: # we iterate inside the visited node and search for an already explored node
                 # The next one is foundamental
-                i[1] = current_node[1] + [direction] # If not, we set the path of the curren node + its direction.
-                #print(i)
-                visited.append(i[0]) # Insert the visited neighbour in the visited list
-                stack.push(tuple(i)) #and than push out the tupla version
+                i[1] = current_node[1] + [i[1]] # If not, we set the path of the neighbour equal to the path from 
+                                                # start to the current + the path to reach the current neighbor
+                stack.push(i) #and than push it in to the stack
 
     # And that's all for the DFS. Let's move on to the next one
 
