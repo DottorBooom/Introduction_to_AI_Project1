@@ -138,7 +138,7 @@ def depthFirstSearch(problem: SearchProblem):
     
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
-
+                                    # or if it's a goal state
     while not stack.isEmpty():  # Unless the stack is empty, execute. Simple.
         current_node = stack.pop() # Pop the nex node from the stack
 
@@ -150,7 +150,7 @@ def depthFirstSearch(problem: SearchProblem):
         for i in neighbors: # We go throw every neighbors
             i = list(i) # As already explained before in the first while, we change the type
 
-            if i[0] not in visited: # we iterate inside the visited node and search for an already explored node
+            if i[0] not in visited: # we iterate inside the visited list and search for an already explored node
                 # The next one is foundamental
                 i[1] = current_node[1] + [i[1]] # If not, we set the path of the neighbour equal to the path from 
                                                 # start to the current + the path to reach the current neighbor
@@ -199,32 +199,34 @@ def breadthFirstSearch(problem: SearchProblem):
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
-                                        # path to each node from the start 
-        queue.push(tuple(i))    # Push every neighbors in to the queue, the first will be the next one to be analyzed
+        i[1] = list([i[1]])     # Change the type of the direction from string to list, so we can insert the 
+                                # path to each node from the start 
+        visited.append(i[0])    # Insert the neighbor in to the visisted list; if I don't do so, the same node could 
+                                # be explored from another node and be expanded 2 times, and we don't want that
+        queue.push(i)    # Push every neighbors in to the queue, the first will be the next one to be analyzed
     
     visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
                                     # Why? Because we only need those for undertsand if a node is already be visited
+                                    # or if it's a goal state
 
     while not queue.isEmpty():  # Unless the queue is empty, execute. Simple.
-        current_node = queue.pop() # Pop the nex node from the queue
-        neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
+        current_node = queue.pop() # Pop the nex node from the queue 
 
         if problem.isGoalState(current_node[0]): # If that particular node is the goal state
-            #print(current_node[1])
             return current_node[1] #Then, we can return the path that we save throw the execution of the code
 
-        # If the node is not a goal state we go throw every neighbors
-        for i in neighbors:
-            i = list(i) # As already explained before the while, we change the type
-            direction = i[1] # And save the current direction of that node
+        neighbors = problem.getSuccessors(current_node[0]) # If it's not the goal, we expand its node
+        for i in neighbors: # We go throw every neighbors
+            i = list(i) # As already explained before in the first while, we change the type
 
-            if i[0] not in visited: # we iterate inside the visited node and search for an already explored node
+            if i[0] not in visited: # we iterate inside the visited list and search for an already explored node
                 # The next one is foundamental
-                i[1] = current_node[1] + [direction] # If not, we set the path of the curren node + its direction.
-                #print(i)
-                visited.append(i[0]) # Insert the visited neighbour in the visited list
-                queue.push(tuple(i)) #and than push out the tupla version
+                i[1] = current_node[1] + [i[1]] # If not, we set the path of the neighbour equal to the path from 
+                                                # start to the current + the path to reach the current neighbor
+                visited.append(i[0])            # And then we insert that node in to the visited list, in this way
+                                                # if the next node in the queue also have this neighbor is not gonna 
+                                                # insert it in the queue again
+                queue.push(i) #and than push it in to the queue
 
     # And that's all for the BFS. Let's move on to the next one
 
