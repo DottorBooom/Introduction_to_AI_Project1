@@ -425,7 +425,9 @@ def cornersHeuristic(state, problem):
                 distancesFromGoals.append(manhattanDistance(state[0],corners[index]))   # Use manhattan method
 
         # Worst case. This guess should be higher than real. Pick higher distance
-        return min(distancesFromGoals)
+        # Using the max distance make it admissible and consistent, in fact this agent even work with the point
+        # 6 of the pdf. Switching it with the min() funtion will make it only admissible and not consistent.
+        return max(distancesFromGoals)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
