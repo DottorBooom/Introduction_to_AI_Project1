@@ -132,7 +132,7 @@ def depthFirstSearch(problem: SearchProblem):
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list([i[1]])     # Change the type of the direction from string to list, so we can insert the 
+        i[1] = [i[1]]   # Change the type of the direction from string to list, so we can insert the 
                                 # path to each node from the start 
         stack.push(i)    # Push every neighbors in to the stack, the last will be the next one to be analyzed
     
@@ -199,7 +199,7 @@ def breadthFirstSearch(problem: SearchProblem):
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list([i[1]])     # Change the type of the direction from string to list, so we can insert the 
+        i[1] = [i[1]]     # Change the type of the direction from string to list, so we can insert the 
                                 # path to each node from the start 
         visited.append(i[0])    # Insert the neighbor in to the visisted list; if I don't do so, the same node could 
                                 # be explored from another node and be expanded 2 times, and we don't want that
@@ -281,7 +281,7 @@ def uniformCostSearch(problem: SearchProblem):
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list([i[1]])    # Change the type of the direction from string to list, so we can insert the 
+        i[1] = [i[1]]   # Change the type of the direction from string to list, so we can insert the 
                                 # path to each node from the start 
         visited.append(i) # Insert the visited neighbour in the visited list
         priorityQueue.push(i,i[2])   # Push every neighbors in to the priority queue, the lowest cost one will be the next to be analyzed.
@@ -326,42 +326,77 @@ def nullHeuristic(state, problem=None):
     """
     return 0
 
+class MyPriorityQueueWithFunction(util.PriorityQueue):
+    """
+    Implements a priority queue with the same push/pop signature of the
+    Queue and the Stack classes. This is designed for drop-in replacement for
+    those two classes. The caller has to provide a priority function, which
+    extracts each item's priority.
+    """
+    def  __init__(self, problem, priorityFunction):
+        "priorityFunction (item) -> priority"
+        self.priorityFunction = priorityFunction      # store the priority function
+        util.PriorityQueue.__init__(self)        # super-class initializer
+        self.problem = problem
+
+    def push(self, item, heuristic):
+        "Adds an item to the queue with priority from the priority function"
+        util.PriorityQueue.push(self, item, self.priorityFunction(self.problem,item,heuristic))
+
+# Calculate f(n) = g(n) + h(n) #
+def f(problem,state,heuristic):
+
+    return problem.getCostOfActions(state[1]) + heuristic(state[0],problem)
+
 def aStarSearch(problem: SearchProblem, heuristic=nullHeuristic):
     """Search the node that has the lowest combined cost and heuristic first."""
     "*** YOUR CODE HERE ***"
     
     visited = []
     priorityQueue = util.PriorityQueue()
-    h = 0
 
-    current_node = problem.getStartState() 
-    for i in problem.getSuccessors(current_node): 
-        i = list(i) 
-        i[1] = list(i[1].split(" "))    
-        priorityQueue.push(i,i[2]+h)   
-                                        
-    visited.append(current_node[0])
+    current_node = (problem.getStartState(), [], 0.0) # Start with a given start node
 
-    while not priorityQueue.isEmpty(): 
-        current_node = priorityQueue.pop() 
-        visited.append(current_node[0])
-        neighbors = problem.getSuccessors(current_node[0]) 
+    if problem.isGoalState(current_node[0]): # Check if that node is a goal state
+        return [] # If the start node is the goal stat, return an empty path
+    
+    priorityQueue.push(current_node, 0.0) # Push the start node in the priority queue with cost equal to 0
+    visited.append(current_node) # And then insert it in the visited list
+    
+    while not priorityQueue.isEmpty(): # Unless the stack is empty, execute. Simple.
 
-        if problem.isGoalState(current_node[0]):
-            #print(current_node[1])
-            return current_node[1]
+        current_node = priorityQueue.pop() # Pop the nex node from the stack
+        if problem.isGoalState(current_node[0]): # If that particular node is the goal state
+            return current_node[1] #Then, we can return the path that we save throw the execution of the code
 
-        for i in neighbors:
-            i = list(i) 
-            direction = i[1] 
-            f = current_node[2] + i[2] + h
-            print(visited)
-            print(i)
-            if i[0] not in visited: 
-                i[1] = current_node[1] + [direction]
-                i[2] = current_node[2]
-                priorityQueue.push(i, f)
 
+        for i in problem.getSuccessors(current_node[0]):    # If the current node is not a goal state
+                                                            # we expand all its neighbors and go throw every one
+            i = list(i) # As already explained before the while, we change the type
+            if i[0] not in [x[0] for x in visited]: # we iterate inside the visited list and search for an already explored node
+                
+                # The next one is foundamental
+                i[1] = current_node[1] + [i[1]] # If not, we set the path of the neighbour equal to the path from 
+                                                # start to the current + the path to reach the current neighbor
+                cost = current_node[2] + i[2] # We save the cost from current node + the cost to reach that neighbor
+                i[2] = cost # Update the neighbor cost
+                visited.append(i)   # And then we insert that node in to the visited list, in this way
+                                    # if the next node in the queue also have this neighbor is not gonna 
+                                    # insert it in the queue again
+                priorityQueue.push(i, cost + heuristic(i[0],problem)) # and than push it in with the updated cost + the herustic cost
+            else: # Otherwise, if the neighbor is in the vissited list
+                for j in visited: # We go throw each node in the visited list
+                    if i[0] == j[0]: # Using the coordinates, if we find that particular node
+                                    # And it's not the starting node
+                        if j[2] > current_node[2] + i[2]:   # If the cost of that node is major of the current node + the cost to
+                                                            # to reach the neighbor
+                            visited.remove(j)   # Remove that particular node from the visited list
+                            cost = current_node[2] + i[2]   # Update its cost with a new (and less) cost
+                            j[2] = cost
+                            j[1] = current_node[1] + [i[1]] # Update its new found path
+                            priorityQueue.push(j,cost + heuristic(i[0],problem)) # And then reinstert it in the priority queue + the heuristic cost
+
+    # And that's all for the A*.
 
 # Abbreviations
 bfs = breadthFirstSearch
