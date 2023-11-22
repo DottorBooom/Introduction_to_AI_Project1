@@ -267,38 +267,55 @@ def uniformCostSearch(problem: SearchProblem):
     # 3) We need to keep track of the cost for reach each node. So, like we did with the path, we update the cost
     # before inserting them inside the priority queue. The priority queue will automatically rearange itself to put
     # first the lowest cost path
+    # 4) Unlike BFS, if we find an already visited node while exploring some neighbor I don't skip it. Instead, I 
+    # confront if the cost to reach that node is less than going throw this neighbor. If so, I remove that node from
+    # the visited list, update the path and then insert it again in the priority queue.
 
     # And that is the summary of the algorithm we need to implement. Let's now analyze the code line by line.
 
     current_node = problem.getStartState() # Start with a given start node
+    visited.append(current_node)    # Insert only the coordinates of the start node in the visite list. 
+                                    # Why? Because we only need those for undertsand if a node is already be visited
+                                    # or if it's a goal state
+
     for i in problem.getSuccessors(current_node): # Expan the neighbors and go throw each one of them
         i = list(i) # Change the neighbors from a Tuple to a List, that's cause the type Tuple would not allow us to 
                     # change any type of his component
-        i[1] = list(i[1].split(" "))    # Change the type of the direction from string to list, so we can insert the 
-                                        # path to each node from the start 
-        priorityQueue.push(tuple(i),i[2])   # Push every neighbors in to the priority queue, the lowest cost one will be the next to be analyzed.
-                                        
-    visited.append(current_node[0]) # Insert only the coordinates of the start node in the visite list. 
-                                    # Why? Because we only need those for undertsand if a node is already be visited
+        i[1] = list([i[1]])    # Change the type of the direction from string to list, so we can insert the 
+                                # path to each node from the start 
+        visited.append(i) # Insert the visited neighbour in the visited list
+        priorityQueue.push(i,i[2])   # Push every neighbors in to the priority queue, the lowest cost one will be the next to be analyzed.
 
     while not priorityQueue.isEmpty():  # Unless the priority queue is empty, execute. Simple.
-        current_node = priorityQueue.pop() # Pop the nex node from the priority queue
-        neighbors = problem.getSuccessors(current_node[0]) # And expand its neighbors 
+        current_node = priorityQueue.pop() # Pop the nex node from the priority queue 
 
         if problem.isGoalState(current_node[0]): # If that particular node is the goal state
-            #print(current_node[1])
             return current_node[1] #Then, we can return the path that we save throw the execution of the code
 
-        # If the node is not a goal state we go throw every neighbors
-        for i in neighbors:
+        neighbors = problem.getSuccessors(current_node[0]) # If it's not the goal, we expand its node        
+        for i in neighbors: # If the node is not a goal state we go throw every neighbors
             i = list(i) # As already explained before the while, we change the type
-            direction = i[1] # And save the current direction of that node
-            if i[0] not in visited: # we iterate inside the visited node and search for an already explored node
+            if i[0] not in [x[0] for x in visited]: # we iterate inside the visited node and search for an already explored node
                 # The next one is foundamental
-                i[1] = current_node[1] + [direction] # If not, we set the path of the curren node + its direction.
-                #print(i)
-                visited.append(i[0]) # Insert the visited neighbour in the visited list
-                priorityQueue.push(tuple(i), current_node[2]+i[2]) # and than push out the tupla version with the updated cost path
+                i[1] = current_node[1] + [i[1]] # If not, we set the path of the neighbour equal to the path from 
+                                                # start to the current + the path to reach the current neighbor
+                cost = current_node[2] + i[2] # We save the cost from current node + the cost to reach that neighbor
+                i[2] = cost # Update the neighbor cost
+                visited.append(i)   # And then we insert that node in to the visited list, in this way
+                                    # if the next node in the queue also have this neighbor is not gonna 
+                                    # insert it in the queue again
+                priorityQueue.push(i, cost) # and than push it in with the updated cost
+            else: # Otherwise, if the neighbor is in the vissited list
+                for j in visited: # We go throw each node in the visited list
+                    if i[0] == j[0] and j != problem.getStartState(): # Using the coordinates, if we find that particular node
+                                                                      # And it's not the starting node
+                        if j[2] > current_node[2] + i[2]:   # If the cost of that node is major of the current node + the cost to
+                                                            # to reach the neighbor
+                            visited.remove(j)   # Remove that particular node from the visited list
+                            cost = current_node[2] + i[2]   # Update its cost with a new (and less) cost
+                            j[2] = cost
+                            j[1] = current_node[1] + [i[1]] # Update its new found path
+                            priorityQueue.push(j,cost) # And then reinstert it in the priority queue
 
     # And that's all for the UCS. Let's move on to the next one
 
