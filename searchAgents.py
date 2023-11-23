@@ -521,7 +521,19 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     """
     position, foodGrid = state
     "*** YOUR CODE HERE ***"
-    return 0
+    
+    # Using the function pre-made, we generate a list that include every position of the food.
+    # We are just gonna use the coordinates of all of them to reach our goal.
+    
+    allHeuristic = [0] # A list for save all the heuristic fo heach food
+    for i in foodGrid.asList(): # We go throw every coordinates of the food
+        allHeuristic.append( mazeDistance(position,i,problem.startingGameState))    # And, using the pre-made heuristic
+                                                                                    # I just give the position of pacman, the
+                                                                                    # position of the food and the starting state.
+    # That's it.
+    # And for the same logic that the max Manhattan Distance was consistent, the maze distance will be the same.
+    # If I change the max to min, the point 7 won't work as planed, too slow and expand too many nodes.
+    return max(allHeuristic)
 
 class ClosestDotSearchAgent(SearchAgent):
     "Search for all food using a sequence of searches"
