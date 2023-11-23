@@ -526,7 +526,8 @@ def foodHeuristic(state: Tuple[Tuple, List[List]], problem: FoodSearchProblem):
     # We are just gonna use the coordinates of all of them to reach our goal.
     
     allHeuristic = [0] # A list for save all the heuristic fo heach food
-    for i in foodGrid.asList(): # We go throw every coordinates of the food
+    listOfFood = foodGrid.asList()
+    for i in listOfFood: # We go throw every coordinates of the food
         allHeuristic.append( mazeDistance(position,i,problem.startingGameState))    # And, using the pre-made heuristic
                                                                                     # I just give the position of pacman, the
                                                                                     # position of the food and the starting state.
@@ -542,6 +543,7 @@ class ClosestDotSearchAgent(SearchAgent):
         currentState = state
         while(currentState.getFood().count() > 0):
             nextPathSegment = self.findPathToClosestDot(currentState) # The missing piece
+            print(nextPathSegment)
             self.actions += nextPathSegment
             for action in nextPathSegment:
                 legal = currentState.getLegalActions()
@@ -550,9 +552,9 @@ class ClosestDotSearchAgent(SearchAgent):
                     raise Exception('findPathToClosestDot returned an illegal move: %s!\n%s' % t)
                 currentState = currentState.generateSuccessor(0, action)
         self.actionIndex = 0
-        print('Path found with cost %d.' % len(self.actions))
+        print ('Path found with cost %d.' % len(self.actions))
 
-    def findPathToClosestDot(self, gameState: pacman.GameState):
+    def findPathToClosestDot(self, gameState):
         """
         Returns a path (a list of actions) to the closest dot, starting from
         gameState.
@@ -564,7 +566,11 @@ class ClosestDotSearchAgent(SearchAgent):
         problem = AnyFoodSearchProblem(gameState)
 
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+
+        # Using BFS defined in search.py to find the goal 
+        from search import breadthFirstSearch
+        return breadthFirstSearch(problem)
+        #util.raiseNotDefined()
 
 class AnyFoodSearchProblem(PositionSearchProblem):
     """
@@ -592,15 +598,16 @@ class AnyFoodSearchProblem(PositionSearchProblem):
         self.costFn = lambda x: 1
         self._visited, self._visitedlist, self._expanded = {}, [], 0 # DO NOT CHANGE
 
-    def isGoalState(self, state: Tuple[int, int]):
+    def isGoalState(self, state):
         """
         The state is Pacman's position. Fill this in with a goal test that will
         complete the problem definition.
         """
         x,y = state
-
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        # A state is a goal if there is food on that position"""
+        return state in self.food.asList()
+
 
 def mazeDistance(point1: Tuple[int, int], point2: Tuple[int, int], gameState: pacman.GameState) -> int:
     """
